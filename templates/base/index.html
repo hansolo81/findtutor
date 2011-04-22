@@ -1,0 +1,557 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title> science.io </title>
+	<link rel="shortcut icon" href="/sitemedia/images/white_star.png" type="image/x-icon" />
+	<link rel="stylesheet" href="/sitemedia/styles/third_party.css" type="text/css"/>
+	
+	<link type="text/css" rel="stylesheet" href="/sitemedia/styles/style.css" />
+
+	<script type="text/javascript" src="/js/script.js"></script>
+	
+	<script type="text/javascript">
+		var active_sub = "default";
+		var active_tab = "none";
+		$(document).ready(function() {
+			/* initial text for input box */
+			$("input[type=text][title]").each(function() {
+			  $(this).val($(this).attr("title"));
+			  if($.trim($(this).val()) == "")
+			    $(this).val($(this).attr("title"));
+			  $(this)
+			    .focus(function() {
+			      if($(this).val() == $(this).attr("title")){
+				 	$(this).val("");
+					$(this).css('color', '#000')
+				  }
+				
+			    })
+			    .blur(function() {
+			      if($.trim($(this).val()) == "") {
+					$(this).css('color', '#999')
+					$(this).val($(this).attr("title"));
+				 }
+			    });
+			});
+			/* expand textarea on focus */
+			$(".expanding_input")
+				.focus(function() {
+			  $(this).css('width', '390px');
+			  $(this).css('height', '250px');			
+			});
+			/* hide an element with toggles */
+   			$('.toggler').click(function(){
+     			$(this).nextAll('.hidable').toggle();
+   			});
+
+			$('.paper_source').click(function() {
+		  		var subid  = '#' + $(this).attr('id') + '_subsources';
+				console.log(subid);
+		  		$(subid).toggle();
+			});
+
+
+			/* auto complete code */
+			$( ".topic_suggest" ).autocomplete({
+				source: "/async/suggest?type=topic",
+				minLength: 2,
+			});
+			$( "#source_suggest" ).autocomplete({
+				source: "/async/suggest?type=source",
+				minLength: 2,
+			});
+			// $( "#paper_suggest" ).autocomplete({
+			// 	source: "/async/suggest?type=paper",
+			// 	minLength: 6,
+			// });	
+			
+			/* ajax */
+			// cast vote
+			$(".vote_item").click(function() {
+				var vote_id = $(this).attr('id');
+				var vote_count_id = vote_id.split('_').slice(0,2).join('_');
+				$(this).addClass('ajaxing');
+				
+				$('#' + vote_count_id + '_up').removeClass('lblue');
+				$('#' + vote_count_id + '_up').addClass('dgray');
+				$('#' + vote_count_id + '_down').removeClass('lblue');
+				$('#' + vote_count_id + '_down').addClass('dgray');
+				$.ajax({
+				  url: "/async/vote" + "?vote_id=" + vote_id,
+				  success: function(result){
+					$('#' + vote_id).removeClass('ajaxing');
+					if(result != 'failure'){
+						$('#' + vote_count_id).html(result);
+					}
+				  }
+				});
+			});
+			$(".follow_box").click(function() {
+				$(this).removeClass('follow_box');
+				$(this).addClass('follow_box_inactive');
+				
+			});
+			$(".delete_topic").click(function() {
+				$(this).parents('.topic').hide()
+			});
+			// add topic
+			var options = { 
+			   success:    function(responseText) { 
+			                $('#topics_for_paper').append(responseText);
+						
+			    		} 
+			}; 
+            $('#addtopic').ajaxForm(options);
+
+			
+			/* tabs */
+			$("ul.tabs li").click(function() {
+				$("ul.tabs li").removeClass("active_tab"); //Remove any "active" class
+				$(this).addClass("active_tab"); //Add "active" class to selected tab
+				$(".tab_content").hide(); //Hide all tab content
+
+				var activeTab = $(this).find("a").attr("href"); //Find the href attribute value to identify the active tab + content
+				$(activeTab).show(); //Fade in the active ID content
+				return false;
+			});
+			$("ul.flabs li").click(function() {
+				var new_tab = $(this).find("a").attr("href");
+				$("ul.flabs li").removeClass("active_flab"); //Remove any "active" class
+				$(".flab_content").hide(); //Hide all tab content
+				if(active_tab == new_tab){
+					new_tab = "none";
+				}else{
+					$(this).addClass("active_flab"); //Add "active" class to selected tab
+				}
+				$(new_tab).show();
+				active_tab = new_tab;
+				return false;
+			});	
+			/* inline swapping menus */
+			$('.goto_submenu').click(function(){
+				var subid  = '#' + 'sub_' + $(this).attr('id');
+     			$(this).parents('.mainmenu').hide();
+				$(subid).show(200);
+   			});
+			$('.goto_mainmenu').click(function(){
+				$(this).parents('.submenu').hide();
+				$(this).parents('.submenu').prevAll('.mainmenu').show(200);
+   			});
+			
+			$('.choose_source').click(function(){
+				var oldid = '#' + active_sub;
+				var oldid_sub = '#submenu_'  + active_sub;
+				new_sub = $(this).attr('id')
+				$(this).addClass('active_subject')
+				$(oldid).removeClass('active_subject')
+				if(new_sub == active_sub){
+					new_sub = 'default';
+				}
+				$(oldid_sub).hide()
+				var subid  = '#submenu_' + new_sub;
+				$(subid).show(200);
+				active_sub = new_sub
+   			});
+
+
+
+
+			$('.goto_child').click(function(){
+				var child_id  = '#' + 'child_' + $(this).attr('id');
+     			$(this).parents('.goto_container').hide();
+				$(child_id).show(200);
+   			});
+			$('.goto_parent').click(function(){
+				$(this).parents('.goto_container').hide();
+				var par_id  = '#' + $(this).parents('.goto_container').attr('id').slice(6);
+				$(par_id).parents('.goto_container').show(200);
+   			});
+ 		});
+		
+    </script>
+	<script type="text/javascript">
+
+	  var _gaq = _gaq || [];
+	  _gaq.push(['_setAccount', 'UA-361590-8']);
+	  _gaq.push(['_trackPageview']);
+
+	  (function() {
+	    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+	  })();
+
+	</script>
+</head>
+
+<body>
+<div class="container">
+	
+	<div class="header" style="">
+			
+				<a href='/' style="text-decoration:none;float:left;margin-top:0px;"> 
+					<img alt="" src="/images/trans_thin.png" height="50px" style="margin-top:8px;"/>
+
+				</a> 
+			
+		<div style="float:right;margin: 19px 0px;">
+				
+		<div class="login_box" >
+				<img alt="" src="/images/lgray_person.png" height="20px" style="padding-bottom: 5px;vertical-align:middle;"/>  <a href="/auth/login?came_from=%2F">Log In</a> </div><div class="login_box"  > <a href="/auth/signup">Sign up</a> 
+		</div>
+	</div>
+	</div>
+
+	<div class="span-24 last all" >
+
+	
+
+<ul class="flabs">
+
+    <li id="topic_tab" ><a href="#flab1">Topic <span  style="color:#999; font-size:60%"> ▼ </span></a></li>
+    <li><a href="#flab2">Journal/Conference </a></li>
+	<li><a href="#flab3">Search </a> </li>
+
+	
+	<li> &nbsp;&nbsp; | &nbsp;&nbsp; </li>
+
+	<li style=""><a href="/paper/submit">Submit a paper</a></li>
+	<li> &nbsp;&nbsp; | &nbsp;&nbsp; </li>
+    
+	<li><a href="/about">About</a></li>
+
+	
+
+</ul>
+
+<div class="flab_container">
+    <div id="flab1" class="flab_content" style="display:none;">
+	    <form action="/list/topic_search" method="get">
+		<input class="topic_suggest search_box" id="topic_suggest" name="q" title=" Start typing to select a topic" type="text" />
+		<input id="submit1" name="submit" type="submit" value="Go" />
+		</form>
+    </div>
+    <div id="flab2" class="flab_content" style="display:none;">
+
+       	<form action="/list/source_search" method="get">
+		<input class="search_box" id="source_suggest" name="q" title=" Search for a specific journal or conference" type="text" />
+		<input id="submit2" name="submit" type="submit" value="Go" />
+		</form>
+    </div>
+    <div id="flab3" class="flab_content" style="display:none;">
+       	<form action="/list/search" method="get">
+		<input class="search_box" id="paper_suggest" name="q" title=" Search for a specific paper or author" type="text" />
+		<input id="submit3" name="submit" type="submit" value="Go" />
+
+		</form>
+    </div>
+</div>
+
+<div class="span-24 last" style="height:20px;"> &nbsp;</div>
+		 
+	
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="span-17" style=" ">
+		
+	
+<div class="span-24" style=" margin: 15px 0;"> 
+<div style="font-size:18px; color:#000; margin: 0px auto; width:70%"><div class="dgray" style="float:left;  margin-right:10px;">science.I/O</div><div style="color:#666;"> is an open science community.</div></div> 
+<div style="width:70%; margin:0px auto;"> 
+
+Comment on, recommend and submit papers. Get up-to-date on a research topic. Follow a journal or an author.
+<span class="dgray">science.I/O is in beta and is currently focused on Computer Science.</span>
+<br/>
+	<br/>
+
+
+
+	
+	
+	<div style="margin:0 0;width:80%;">
+		<form action="/list/topic_search" method="get">
+		<input class="topic_suggest search_box_big" name="q" title=" Start typing to find a research area" type="text" />
+		<input id="submit" name="submit" style="height:30px; font-size:16px;" type="submit" value="Go" />
+
+		</form>
+	</div>
+<br/><br/>
+</div>
+
+</div>
+</div>
+
+	
+	
+
+	
+
+
+<div class="span-17">
+
+<h2 class="dgray"> Featured Papers </h2>
+<table>
+
+<tr>
+	<td style="font-size:34px;color:#999;padding-right:15px;vertical-align:middle;">AI</td>
+	<td class="">
+		<div style="margin-top:5px; color:#666;">Best Paper Award at KDD 2010</div>
+	
+	<div class="headline">
+								<a display="Connecting the dots between news articles" href="/paper/120717/connecting-the-dots-between-news-articles" title="Connecting the dots between news articles">Connecting the dots between news articles</a> 
+								
+						<br/>
+
+							<span class="byline" style="padding-left:0px"> 
+							
+								 
+								By Dafna Shahaf, Carlos Guestrin 
+								<br/>
+
+								<span class="lblue" title="Recommended by 5">5 <img alt="" src="/images/lgray_star.png" height="12px" style="padding:0;margin:0px"/> </span>
+								&middot; <span class="lblue" title="0 comments">0 <img alt="" src="/images/lgray_chat.png" height="12px" style="padding:0;margin:0px"/></span>
+								&middot;
+									User Submitted
+							 	
+									&middot;
+									published 07/2010
+								
+								
+							</span>
+							</div>
+
+	
+	</td>
+</tr>
+<tr style="height:15px"></tr>
+<tr>
+	<td style="font-size:34px;color:#999;padding-right:15px;vertical-align:middle;">DB</td>
+	<td class="">
+		<div style="margin-top:5px; color:#666;">Best Paper Award at VLDB 2009</div>
+	
+	<div class="headline">
+								<a display="A unified approach to ranking in probabilistic databases" href="/paper/120718/a-unified-approach-to-ranking-in-probabilistic" title="A unified approach to ranking in probabilistic databases">A unified approach to ranking in probabilistic databases</a> 
+								
+						<br/>
+
+							<span class="byline" style="padding-left:0px"> 
+							
+								 
+								By Jian Li, Barna Saha, Amol Deshpande 
+								<br/>
+								<span class="lblue" title="Recommended by 3">3 <img src="/images/lgray_star.png" height="12px" style="padding:0;margin:0px"/> </span>
+								&middot; <span class="lblue" title="0 comments">0 <img src="/images/lgray_chat.png" height="12px" style="padding:0;margin:0px"/></span>
+								&middot;
+									User Submitted
+							 	
+									&middot;
+
+									published 08/2009
+								
+								
+							</span>
+							</div>
+
+	
+	</td>
+</tr>
+<tr style="height:15px"></tr>
+<tr>
+	<td style="font-size:34px;color:#999;padding-right:15px;vertical-align:middle;">OS</td>
+	<td class="">
+		<div style="margin-top:5px; color:#666;">Best Paper Award at SOSP 2009</div>
+
+	
+	<div class="headline">
+								<a display="FAWN: a fast array of wimpy nodes" href="/paper/1757/fawn-a-fast-array-of-wimpy-nodes" title="FAWN: a fast array of wimpy nodes">FAWN: a fast array of wimpy nodes</a> 
+								
+						<br/>
+
+							<span class="byline" style="padding-left:0px"> 
+							
+								 
+								By David G. Andersen, Jason Franklin, Michael Kaminsky, Amar Phanishayee, Lawrence Tan, Vijay Vasudevan 
+								<br/>
+								<span class="lblue" title="Recommended by 2">2 <img src="/images/lgray_star.png" height="12px" style="padding:0;margin:0px"/> </span>
+								&middot; <span class="lblue" title="1 comments">1 <img src="/images/lgray_chat.png" height="12px" style="padding:0;margin:0px"/></span>
+
+								&middot;
+									from 
+										Unknown source
+							 	
+									&middot;
+									published 10/2009
+								
+								
+							</span>
+							</div>
+
+	
+	</td>
+</tr>
+<tr style="height:15px"></tr>
+<tr>
+	<td style="font-size:34px;color:#999;padding-right:15px;vertical-align:middle;">UI</td>
+
+	<td class="">
+		<div style="margin-top:5px; color:#666;">Best Paper Award at UIST 2010</div>
+	
+	<div class="headline">
+								<a display="VizWiz: Nearly Real-time Answers to Visual Questions" href="/paper/114681/vizwiz-nearly-real-time-answers-to-visual" title="VizWiz: Nearly Real-time Answers to Visual Questions">VizWiz: Nearly Real-time Answers to Visual Questions</a> 
+								
+						<br/>
+
+							<span class="byline" style="padding-left:0px"> 
+							
+								 
+								By Jeff P. Bigham, et al 
+								<br/>
+								<span class="lblue" title="Recommended by 3">3 <img src="/images/lgray_star.png" height="12px" style="padding:0;margin:0px"/> </span>
+
+								&middot; <span class="lblue" title="1 comments">1 <img src="/images/lgray_chat.png" height="12px" style="padding:0;margin:0px"/></span>
+								&middot;
+									User Submitted
+							 	
+									&middot;
+									published 10/2010
+								
+								
+							</span>
+							</div>
+
+	
+	</td>
+
+</tr>
+<tr style="height:15px"></tr>
+<tr>
+	<td style="font-size:34px;color:#999;padding-right:15px;vertical-align:middle;">AI</td>
+	<td class="">
+		<div style="margin-top:5px; color:#666;">Best Paper Award at ACM SIGIR 2010</div>
+	
+	<div class="headline">
+								<a display="Assessing the scenic route: measuring the value of search trails in web logs" href="/paper/120714/assessing-the-scenic-route-measuring-the-value-of" title="Assessing the scenic route: measuring the value of search trails in web logs">Assessing the scenic route: measuring the value of search trails in web logs</a> 
+								
+						<br/>
+
+							<span class="byline" style="padding-left:0px"> 
+							
+								 
+								By Ryen W. White, Jeff Huang 
+								<br/>
+								<span class="lblue" title="Recommended by 3">3 <img src="/images/lgray_star.png" height="12px" style="padding:0;margin:0px"/> </span>
+								&middot; <span class="lblue" title="0 comments">0 <img src="/images/lgray_chat.png" height="12px" style="padding:0;margin:0px"/></span>
+								&middot;
+									User Submitted
+							 	
+									&middot;
+
+									published 07/2010
+								
+								
+							</span>
+							</div>
+
+	
+	</td>
+</tr>
+<tr style="height:15px"></tr>
+<tr>
+	<td style="font-size:34px;color:#999;padding-right:15px;vertical-align:middle;">UX</td>
+	<td class="">
+		<div style="margin-top:5px; color:#666;">Best Paper Award at CHI 2010</div>
+
+	
+	<div class="headline">
+								<a display="Useful junk?: the effects of visual embellishment on comprehension and memorability of charts" href="/paper/1606/useful-junk-the-effects-of-visual-embellishment" title="Useful junk?: the effects of visual embellishment on comprehension and memorability of charts">Useful junk?: the effects of visual embellishment on comprehension and memorability of charts</a> 
+								
+						<br/>
+
+							<span class="byline" style="padding-left:0px"> 
+							
+								 
+								By Scott Bateman, Regan L. Mandryk, Carl Gutwin, Aaron Genest, David McDine, Christopher Brooks 
+								<br/>
+								<span class="lblue" title="Recommended by 2">2 <img src="/images/lgray_star.png" height="12px" style="padding:0;margin:0px"/> </span>
+								&middot; <span class="lblue" title="0 comments">0 <img src="/images/lgray_chat.png" height="12px" style="padding:0;margin:0px"/></span>
+
+								&middot;
+									from 
+										Unknown source
+							 	
+									&middot;
+									published 04/2010
+								
+								
+							</span>
+							</div>
+
+	
+	</td>
+</tr>
+<tr style="height:15px"></tr>
+</table>
+
+
+
+
+</div>
+<div class="span-7 last">
+	<div class="sidebox">
+		
+		
+
+		
+		<div class="sidemain">
+		<h3 class="dgray hrbottom">Features coming soon:</h3>
+		<ul style="color:#000; margin-top:5px;">
+		<li><img src="/images/lgray_star.png" height=12px/> Author profiles -- Claim your papers. </li>
+
+		<li><img src="/images/lgray_star.png" height=12px/> Groups -- Create a group for your department. </li>
+		<li><img src="/images/lgray_star.png" height=12px/> Paper revisions and version control.</li>
+		</ul>
+
+		<br/>
+		<div class="hrtop"> </div>
+		<br/>
+
+		<div style="border-top: solid 0px #6c2;">
+		
+			Comments, suggestions, errors?
+			<form action="/main/feedback" method="post">
+			<textarea class="expanding_input" id="t" name="t" style="width:150px;height:50px;" title=""></textarea> 
+		 	<input id="submit" name="submit" type="submit" value="Submit Feedback" /> 
+			</form> 
+		</div>
+		</div>
+
+	</div>
+
+</div>
+
+
+
+	</div> <!-- content -->
+	<div class="span-24 last footer" style='height:80px'> Thoughts, suggestions, comments, problems? Email feedback@science.io </div>
+
+</div> <!-- container -->
+
+</body>
+</html>
+
+
